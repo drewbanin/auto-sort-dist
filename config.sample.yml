@@ -1,0 +1,34 @@
+
+# db conn info
+conn:
+    host: xxx
+    user: xxx
+    password: xxx
+    port: xxx
+    dbname: xxx
+
+# whitelist schemas here
+schemas:
+    - schema_1
+    - schema_2
+
+# customize these as needed
+sort_key_guesses:
+    - created_at
+    - updated_at
+    - create_date
+    - created_date
+    - createddate
+    - createdate
+    - id
+    - _sdc_source_key_id
+    - _sdc_source_key_ad_id
+    - ad_id
+
+
+# customize these as needed
+dist_key_guesses:
+    - id
+    - ad_id
+    - _sdc_source_key_id
+    - _sdc_source_key_ad_id
