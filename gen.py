@@ -79,6 +79,7 @@ def get_comment(schema, table):
     query = "select description from pg_description where objoid = '{}.{}'::regclass;".format(schema, table)
     res = run(query)
     if len(res) != 1:
+        print >> sys.stderr, "    WARNING: No comment found for {}.{}".format(schema, table)
         return ""
     else:
         return res[0][0]
