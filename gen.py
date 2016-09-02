@@ -78,7 +78,10 @@ def get_drop_query(schema, table_name):
 def get_comment(schema, table):
     query = "select description from pg_description where objoid = '{}.{}'::regclass;".format(schema, table)
     res = run(query)
-    return res[0][0]
+    if len(res) != 1:
+        return ""
+    else:
+        return res[0][0]
 
 def best_guess_sort_key(table_name, cols):
     lower_cols = [col.lower() for col in cols]
