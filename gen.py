@@ -5,8 +5,6 @@ import json, yaml
 
 config =  yaml.load(open('config.yml'))
 
-
-
 db_config = config['conn']
 conn_str = "dbname='{dbname}' user='{user}' host='{host}' password='{password}' port='{port}'".format(**db_config)
 
