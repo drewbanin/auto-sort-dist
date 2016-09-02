@@ -20,6 +20,12 @@ DROP TABLE backup_{tablename};
 END TRANSACTION;
 ```
 
+Install:
+==========
+
+  1. Clone this repo
+  2. `pip install -r  requirements.txt`
+
 Config:
 ==========
 
