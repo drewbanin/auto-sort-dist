@@ -9,11 +9,19 @@ conn:
 
 # whitelist schemas here
 schemas:
-    - schema_1
-    - schema_2
+    - salesfore
+    - bedpost
+    - storefront
+    - facebook_at
+    - facebook_ch
+    - facebook_us
+    - facebook_uk
+    - facebook_de
+    - facebook_can
 
 # customize these as needed
 sort_key_guesses:
+    - completed_at
     - created_at
     - updated_at
     - create_date
