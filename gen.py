@@ -1,9 +1,11 @@
 import psycopg2
-import sys, os
+import sys
+import os
 from collections import defaultdict
-import json, yaml
+import json
+import yaml
 
-config =  yaml.load(open('config.yml'))
+config = yaml.load(open('config.yml'))
 
 db_config = config['conn']
 conn_str = "dbname='{dbname}' user='{user}' host='{host}' password='{password}' port='{port}'".format(**db_config)
@@ -12,6 +14,7 @@ schemas = config['schemas']
 
 handle = psycopg2.connect(conn_str)
 cursor = handle.cursor()
+
 
 def run(sql, get=True):
     cursor.execute(sql)
@@ -23,9 +26,11 @@ def run(sql, get=True):
 sp_query = "set search_path to {}".format(", ".join(["'{}'".format(schema) for schema in schemas]))
 run(sp_query, get=False)
 
+
 def get_tables(schema):
     sql = "select tablename from pg_tables where schemaname = '{schema}'".format(schema=schema)
     return [(schema, table) for (table,) in run(sql)]
+
 
 def get_cols():
     schemas_csv = ",".join(["'{}'".format(schema) for schema in schemas])
@@ -43,6 +48,7 @@ schema_tables = []
 for schema in schemas:
     schema_tables.extend(get_tables(schema))
 
+
 def get_create_query(schema_name, table_name, keys):
     sorttype = keys.get('sorttype', 'compound')
     sortkeys = keys.get('sort', None)
@@ -52,7 +58,6 @@ def get_create_query(schema_name, table_name, keys):
 
     diststyle = keys.get('diststyle', 'key')
     distkey = keys.get('dist', None)
-
 
     sd_keys = ""
     if distkey is not None:
@@ -70,8 +75,10 @@ CREATE TABLE "{schema}"."{table}__tmp_with_keys"\n{sd_keys}\nAS (
 def get_rename_query(schema, old_table, new_table):
     return 'alter table "{schema}"."{old_table}" rename to "{new_table}";'.format(schema=schema, old_table=old_table, new_table=new_table)
 
+
 def get_drop_query(schema, table_name):
     return 'drop table "{schema}"."{table_name}" cascade;'.format(schema=schema, table_name=table_name)
+
 
 def get_comment(schema, table):
     query = "select description from pg_description where objoid = '{}.{}'::regclass;".format(schema, table)
@@ -81,6 +88,7 @@ def get_comment(schema, table):
         return ""
     else:
         return res[0][0]
+
 
 def best_guess_sort_key(table_name, cols):
     lower_cols = [col.lower() for col in cols]
@@ -95,6 +103,7 @@ def best_guess_sort_key(table_name, cols):
         if pref in lower_cols:
             return cols[lower_cols.index(pref)]
     return None
+
 
 def best_guess_dist_key(cols):
     lower_cols = [col.lower() for col in cols]
@@ -132,7 +141,7 @@ for i, (schema, table) in enumerate(schema_tables):
         print >> sys.stderr, "Running {} of {} -- {}.{}".format(i + 1, len(schema_tables), schema, table)
 
     comment = get_comment(schema, table)
-    create_stmt =  get_create_query(schema, table, keys)
+    create_stmt = get_create_query(schema, table, keys)
     move_existing = get_rename_query(schema, table, table + '__tmp_backup')
     move_new = get_rename_query(schema, table + "__tmp_with_keys", table)
     delete_old = get_drop_query(schema, table + "__tmp_backup")
@@ -158,7 +167,8 @@ for filename in filenames:
 with open('manifest.json', 'w') as fh:
     json.dump(manifest, fh)
 
-print >> sys.stderr, "Missing %% : dist: %0.2f, sort: %0.2f" % (missing_dist / float(len(schema_tables)) * 100, missing_sort / float(len(schema_tables)) * 100)
+print >> sys.stderr, "Missing %% : dist: %0.2f, sort: %0.2f" % (
+    missing_dist / float(len(schema_tables)) * 100, missing_sort / float(len(schema_tables)) * 100)
 
 
 cursor.close()
